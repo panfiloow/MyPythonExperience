@@ -2,6 +2,9 @@
 https://pydocs.ru/peremennye-i-konstanty-v-python/ - переменные и константы
 https://pydocs.ru/chisla-v-python-3/ - числа 
 https://pydocs.ru/rabota-so-spiskami-v-python/ - списки 
+https://pydocs.ru/mnozhestva-v-python/ - множества 
+https://pydocs.ru/python-rabota-so-strokami/ - строки
+https://pydocs.ru/python-rabota-so-slovaryami/ - словари
 
 '''
 #импорты для чисел
@@ -13,6 +16,7 @@ import random as rand
 
 #импорты для списков
 
+#############################################################################
 
 print("Блок чисел: ")
 
@@ -39,6 +43,10 @@ print("Приведение типов int -> float:", float(intVariable))
 print("Модуль math (квадратный корень числа 9):", math.sqrt(9))
 print("Модуль random (четные числа до 10)", rand.randrange(0, 10, 2)) # четные числа до 10
 print("\n\n\n\n")
+
+
+
+#############################################################################
 
 print("Блок списков: ")
 '''
@@ -114,3 +122,73 @@ list = ['p','r','o','b','l','e','m']
 print('p' in list)
 print('a' in list)
 print('c' not in list)
+
+#############################################################################
+print("Блок строк:")
+
+'''
+lower()
+upper(),
+.join(), 
+split(),
+find(),
+replace()
+'''
+
+#как и в списках есть срезы и индексация 
+#str = "pydocs"
+#str[2] = "a"
+#Результат:
+#TypeError: 'str' object does not support item assignment
+ 
+str = "pydocs"
+print(str)
+str = "pydocs.ru"
+print(str)
+#Конкатенация строк + для добавления, * если надо повторить несколько раз
+print(str+str)
+print(str*5)
+
+#Итерация по строке
+count = 0
+for i in str:
+    if i == '.':
+        count += 1
+print(count)
+
+#проверка наличия in
+print('o' in str)
+
+#Метод format() и f — строки для форматирования строк
+name = "{},{} и {}".format("Тимур","Антон","Катя", "бебра")
+ 
+print(name)
+
+name = "{s},{b} и {j} ".format(j='Тимур', b='Антон', s = 'Катя')
+ 
+print(name)
+
+name = "Тимур"
+ 
+age = 30
+ 
+print(f"Меня зовут {name} Мне {age} лет.")
+
+strMetods = "БОЛЬШИЕБУКВЫ маленькиебуквы"
+print(strMetods.lower())
+print(strMetods.upper())
+print("".join(strMetods + name))
+print(strMetods.split())
+print(name.replace("Т", "Б"))
+
+#############################################################################
+"""
+Кортежи - неизменяемые списки
+Множества  — это неупорядоченная коллекция. Все элементы внутри множества, обязательно должны быть уникальными.
+Однако само множество является изменяемым, python позволяет нам удалять, или добавлять элементы. 
+Так же, со множествами мы можем производить математические операции, объединение, пересечение множеств, и.т.д.
+Словари - https://pydocs.ru/python-rabota-so-slovaryami/
+"""
+
+
+
