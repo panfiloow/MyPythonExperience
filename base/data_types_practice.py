@@ -43,3 +43,7 @@ def myStringFunc(myStr):
     return myStr
 
 print(myStringFunc(strings))
+
+"""
+Вывод: всегда инициализировать переменные до их использования. Сначала искать встроенную функцию 
+"""
