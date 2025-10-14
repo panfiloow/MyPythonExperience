@@ -1,0 +1,17 @@
+{
+  "12345": {
+    "balance": 550.0,
+    "transactions": [
+      {
+        "type": "deposit",
+        "amount": 500.0,
+        "datetime": "2025-10-14T19:57:54.265845",
+        "balance_after": 550.0
+      }
+    ]
+  },
+  "123": {
+    "balance": 20.0,
+    "transactions": []
+  }
+}
