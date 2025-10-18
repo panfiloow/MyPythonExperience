@@ -846,39 +846,3 @@ if __name__ == "__main__":
         
 """
 
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.insert(0, current_dir)
-
-
-def main():
-    # Путь к папке с плагинами (рядом с этим файлом)
-    plugins_path = os.path.join(current_dir, "plagins")
-    
-    print(f"Ищем плагины в: {plugins_path}")
-    
-    # Проверяем существование папки
-    if not os.path.exists(plugins_path):
-        print(f"Ошибка: Папка {plugins_path} не существует!")
-        return
-    
-    manager = PluginManager(plugins_path)
-    
-    # Обнаруживаем и загружаем все плагины
-    manager.discover_plugins()
-    
-    # Выводим список загруженных плагинов
-    print("\nЗагруженные плагины:", manager.list_plugins())
-    
-    # Используем плагины
-    if "Calculator Plugin" in manager.plugins:
-        result = manager.execute_plugin("Calculator Plugin", 'add', 10, 5)
-        print(f"Результат вычисления: {result}")
-    
-    if "Text Processor Plugin" in manager.plugins:
-        result = manager.execute_plugin("Text Processor Plugin", "hello world", 'uppercase')
-        print(f"Результат обработки текста: {result}")
-
-if __name__ == "__main__":
-    main()
