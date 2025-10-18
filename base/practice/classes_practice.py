@@ -1,5 +1,12 @@
-import datetime
-from typing import List, Optional
+from datetime import datetime
+from typing import List, Optional, Callable, Any
+import time
+import json
+from pathlib import Path
+from base.practice.plugin_manager import PluginManager
+import os
+import sys
+from plugin_manager import PluginManager
 """
 
 Уровень 1: Начальный
@@ -343,7 +350,8 @@ class Library:
         return f"Library contains {len(self.books)} books:\n{books_list}"
 
 
-
+""" 
+Демонстрация работы классов Book и Library
 book1 = Book("Война и мир", "Л.Н. Толстой", 1800)
 book2 = Book("Преступление и наказание", "Достоевский", 1900)
 
@@ -353,7 +361,7 @@ my_lib.add_book(Book("Война и мир", "Л. Н. Тонкий", 1700))
 print(str(my_lib))
 my_lib.remove_book("Война и мир")
 print(str(my_lib))
-        
+"""      
 
 
 """
@@ -393,9 +401,180 @@ class Order:
     def calculate_total(self):
         return sum(p.price for p in self.products) 
 """
+class Employee:
+    
+    _count = 0
+    
+    def __init__(self, name : str, surname: str, salary: float | int):
+        self._validate_employee_data(name, surname, salary) 
+        self.name = name
+        self.surname = surname
+        self.salary = salary
+        Employee._count += 1
+        
+    def _validate_employee_data(self, name, surname, salary):
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(f"Name must be not empty string, got {name}, type: {type(name).__name__}")
+        if not isinstance(surname, str) or not surname.strip():
+            raise ValueError(f"Surname must be not empty string, got {surname}, type: {type(surname).__name__}")
+        if not isinstance(salary, (float, int)) or salary < 0:
+            raise ValueError(f"Salary must be positive number, got {salary}, type: {type(salary).__name__}")
+        
+    @staticmethod
+    def count_employee() -> int:
+        return Employee._count
+               
+
+class Manager(Employee):
+    
+    def __init__(self, name : str, surname : str, salary : float, subordinates : List[Employee] = None):
+        super().__init__(name, surname, salary)
+        self._validate_subordinates(subordinates)
+        self.suburdinates = subordinates if subordinates else []
+    
+    def calculate_bonus(self) -> float:
+        return self.salary * 0.15
+    
+    def get_suburdinates(self) -> List[Employee]:
+        return self.suburdinates.copy()
+    
+    def _validate_subordinates(self, subordinates):
+        if subordinates is not None:
+            if not all(isinstance(sub, (Employee, Developer)) for sub in subordinates):
+                raise ValueError("All subordinates must be Employee instances")
+        return subordinates
+    
+        
+
+class Developer(Employee):
+    
+    def __init__(self, name, surname, salary, programming_languages: List[str] = None):
+        super().__init__(name, surname, salary)
+        self.programming_languages = programming_languages if programming_languages else []
+    
+    def calculate_bonus(self) -> float:
+        return self.salary * 0.10
+    
+    def _validate_programming_languages(self, programming_languages):
+        if programming_languages is not None:
+            if not all(isinstance(lang, str) and lang.strip() for lang in programming_languages):
+                raise ValueError("programming_languages must be list not empty strings")
+            
+"""
+employee1 = Employee("Владлов", "Фролен", 50000)
+developer1 = Developer("Владлен", "Фролов", 150000, ["js", "html", 'typescript', 'python'])            
+manager1 = Manager("Фровлад", "Ленлов", 260000.24, [employee1, developer1])
+print(Employee._count)
+"""
+def discount_10_percent(func):
+        
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        return result * 0.9
+        
+    return wrapper
+    
+def seasonal_discount(func):
+        
+    def wrapper(*args, **kwargs):
+        current_month = datetime.now().month
+        
+        if 3 <= current_month <= 5:  # весна
+            discount = 0.08
+        elif 6 <= current_month <= 8:  # лето
+            discount = 0.05
+        elif 9 <= current_month <= 11:  # осень
+            discount = 0.10
+        else:  # зима
+            discount = 0.15
+            
+        result = func(*args, **kwargs)
+        return result * (1 - discount)
+    
+    return wrapper
 
 
 
+class Product():
+    
+    def __init__(self, name: str, price : float | int):
+        self._validate_product_data(name, price)
+        self.name = name
+        self.price = price
+    
+    def _validate_product_data(self, name, price) -> None: 
+        if not isinstance(name, str) or not name.strip():
+            raise ValueError(f"Product title must be not empty string, got {name} type: {type(name).__name__}")
+        if not isinstance(price, (float, int)) or price < 0:
+            raise ValueError(f"Product price must be positive number, got {price} type:{type(price).__name__}")
+
+class Order():
+    
+    def __init__(self, products : List[Product] = None):
+        self._validate_products(products)
+        self.products = products if products else []
+    
+    def _validate_products(self, products) -> None:
+        if products is not None:
+            if not all(isinstance(product, Product) for product in products):
+                raise ValueError("All values in products must be Product class object")
+    
+    def add_products(self, products : List[Product]) -> None:
+        self._validate_products(products)
+        self.products.extend(products)
+    
+    def add_product(self, product: Product) -> None:
+        if not isinstance(product, Product):
+            raise ValueError("Product must be an instance of Product class")
+        self.products.append(product)
+    
+    @discount_10_percent
+    @seasonal_discount
+    def calculate_total(self) -> float:
+        if not self.products:
+            return 0.0
+        return sum(p.price for p in self.products) 
+    
+    def __str__(self) -> str:
+        if not self.products:
+            return "Заказ пуст"
+        
+        result = ["ЗАКАЗ"]
+        result.append("=" * 50)
+        
+        for i, product in enumerate(self.products, 1):
+            product_info = f"{i}. {product.name}" 
+            product_info += f" - {product.price:.2f} ₽"
+            result.append(product_info)
+        
+        result.append("=" * 50)
+        result.append(f"Количество товаров: {len(self.products)}")
+        
+        base_total = sum(p.price for p in self.products)
+        final_total = self.calculate_total()
+        total_discount = base_total - final_total
+        
+        result.append(f"Сумма без скидок: {base_total:.2f} ₽")
+        
+        if total_discount > 0:
+            discount_percent = (total_discount / base_total * 100)
+            result.append(f"Общая скидка: -{total_discount:.2f} ₽ ({discount_percent:.1f}%)")
+            result.append("-" * 30)
+            result.append(f"ИТОГОВАЯ СУММА: {final_total:.2f} ₽")
+        else:
+            result.append(f"ИТОГОВАЯ СУММА: {final_total:.2f} ₽")
+        
+        return "\n".join(result)
+
+"""      
+product1 = Product("Банка Бандюэля", 100)
+product2 = Product("Палмито", 300.55)
+order1 = Order([product1])
+print(str(order1))
+order1.add_products([product2])
+print(str(order1))
+""" 
+        
 """
 Уровень 4: Экспертный
 Задача 4.1: Собственный контекстный менеджер
@@ -412,3 +591,294 @@ class Order:
 Реализуйте систему, которая автоматически находит и загружает все классы-наследники Plugin из указанной директории.
  
 """
+
+"""
+Задача 4.1 без сохранения результатов в файл
+class Timer():
+    
+    def __enter__(self):
+        self.start_time = time.perf_counter()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.exit_time = time.perf_counter()
+        self.elapsed_time = self.exit_time - self.start_time
+        print(f"Время выполнения: {self.elapsed_time:.6f} секунд")
+        
+    def __call__(self, func):
+        
+        def wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            result = func(*args, **kwargs)
+            exit_time = time.perf_counter()
+            elapsed_time = exit_time - start_time
+            print(f"Время выполнения: {elapsed_time:.6f} секунд")
+            return result
+        return wrapper
+
+@Timer()
+def test_timer_func():
+    for i in range(101):
+        if i > 99:
+            print("Почти...")
+
+with Timer() as timer:
+    for i in range(101):
+        if i > 99:
+            print("Почти...")
+
+test_timer_func()
+
+""" 
+
+
+class Timer:
+    def __init__(
+        self, 
+        name: Optional[str] = None,
+        log_file: str = "base/practice/timer_logs.json",
+        unit: str = "seconds",
+        verbose: bool = True
+    ):
+        self.name = name
+        self.log_file = Path(log_file)
+        self.unit = unit
+        self.verbose = verbose
+        self._ensure_log_file()
+    
+    def _ensure_log_file(self) -> None:
+        if not self.log_file.exists():
+            with open(self.log_file, 'w', encoding='utf-8') as f:
+                json.dump([], f)
+    
+    def _convert_time(self, seconds: float) -> float:
+        units = {
+            "seconds": 1,
+            "milliseconds": 1000,
+            "microseconds": 1000000,
+            "minutes": 1/60
+        }
+        return seconds * units.get(self.unit, 1)
+    
+    def _get_unit_symbol(self) -> str:
+        symbols = {
+            "seconds": "s",
+            "milliseconds": "ms",
+            "microseconds": "μs",
+            "minutes": "min"
+        }
+        return symbols.get(self.unit, "s")
+    
+    def _save_to_file(self, operation: str, elapsed: float) -> None:
+        try:
+            with open(self.log_file, 'r', encoding='utf-8') as f:
+                logs = json.load(f)
+            
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "name": self.name or operation,
+                "elapsed_time": elapsed,
+                "unit": self.unit,
+                "operation": operation
+            }
+            
+            logs.append(log_entry)
+            
+            with open(self.log_file, 'w', encoding='utf-8') as f:
+                json.dump(logs, f, indent=2, ensure_ascii=False)
+                
+        except Exception as e:
+            print(f"Ошибка при сохранении в файл: {e}")
+    
+    def _format_time(self, elapsed_seconds: float) -> str:
+        converted_time = self._convert_time(elapsed_seconds)
+        symbol = self._get_unit_symbol()
+        return f"{converted_time:.6f} {symbol}"
+    
+    def __enter__(self) -> 'Timer':
+        self.start_time = time.perf_counter()
+        return self
+    
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self.end_time = time.perf_counter()
+        self.elapsed_time = self.end_time - self.start_time
+        
+        operation_name = self.name or "context_block"
+        
+        self._save_to_file(operation_name, self.elapsed_time)
+        
+        if self.verbose:
+            formatted_time = self._format_time(self.elapsed_time)
+            status = "с ошибкой" if exc_type else "успешно"
+            print(f"[Timer] {operation_name} завершен {status}. Время: {formatted_time}")
+    
+    def __call__(self, func: Callable) -> Callable:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            start_time = time.perf_counter()
+            
+            try:
+                result = func(*args, **kwargs)
+                end_time = time.perf_counter()
+                elapsed_time = end_time - start_time
+                
+                operation_name = self.name or func.__name__
+                self._save_to_file(operation_name, elapsed_time)
+                
+                if self.verbose:
+                    formatted_time = self._format_time(elapsed_time)
+                    print(f"[Timer] {operation_name} завершен успешно. Время: {formatted_time}")
+                
+                return result
+                
+            except Exception as e:
+                end_time = time.perf_counter()
+                elapsed_time = end_time - start_time
+                
+                operation_name = self.name or func.__name__
+                self._save_to_file(operation_name, elapsed_time)
+                
+                if self.verbose:
+                    formatted_time = self._format_time(elapsed_time)
+                    print(f"[Timer] {operation_name} завершен с ошибкой {e}. Время: {formatted_time}")
+                
+                raise e
+        
+        return wrapper
+    
+    def get_stats(self) -> dict:
+        try:
+            with open(self.log_file, 'r', encoding='utf-8') as f:
+                logs = json.load(f)
+            
+            if not logs:
+                return {}
+            
+            relevant_logs = logs
+            if self.name:
+                relevant_logs = [log for log in logs if log.get('name') == self.name]
+            
+            if not relevant_logs:
+                return {}
+            
+            times = [log['elapsed_time'] for log in relevant_logs]
+            
+            return {
+                'count': len(relevant_logs),
+                'min': min(times),
+                'max': max(times),
+                'average': sum(times) / len(times),
+                'total': sum(times)
+            }
+            
+        except Exception as e:
+            print(f"Ошибка при чтении статистики: {e}")
+            return {}
+
+"""
+тест Timer с сохранением в файл
+if __name__ == "__main__":
+    print("=== Демонстрация Timer ===")
+    
+    # Тест 1: Контекстный менеджер с разными настройками
+    print("\n1. Контекстный менеджер:")
+    with Timer(name="test_context", unit="milliseconds") as timer:
+        time.sleep(0.1)
+        result = sum(i**2 for i in range(1000))
+    
+    print(f"Результат вычислений: {result}")
+    
+    # Тест 2: Декоратор
+    print("\n2. Декоратор:")
+    
+    @Timer(name="heavy_calculation", unit="milliseconds")
+    def heavy_calculation(n: int) -> int:
+        #Тяжелые вычисления
+        time.sleep(0.05)
+        return sum(i**3 for i in range(n))
+    
+    result = heavy_calculation(500)
+    print(f"Результат: {result}")
+    
+    # Тест 3: Декоратор с ошибкой
+    print("\n3. Декоратор с ошибкой:")
+    
+    @Timer(name="failing_function", unit="milliseconds")
+    def failing_function():
+        time.sleep(0.01)
+        raise ValueError("Искусственная ошибка!")
+    
+    try:
+        failing_function()
+    except ValueError as e:
+        print(f"Поймана ошибка: {e}")
+    
+    # Тест 4: Разные единицы измерения
+    print("\n4. Разные единицы измерения:")
+    
+    with Timer(name="micro_test", unit="microseconds", verbose=True) as t:
+        time.sleep(0.001)
+    
+    with Timer(name="minute_test", unit="minutes", verbose=True) as t:
+        time.sleep(0.1)
+    
+    # Тест 5: Статистика
+    print("\n5. Статистика:")
+    stats_timer = Timer(name="heavy_calculation")
+    stats = stats_timer.get_stats()
+    print(f"Статистика для heavy_calculation: {stats}")
+    
+    # Тест 6: Без вывода (verbose=False)
+    print("\n6. Тихий режим (verbose=False):")
+    with Timer(name="silent_test", verbose=False) as t:
+        time.sleep(0.05)
+    print("Тихий режим завершен (ничего не вывелось)")
+    
+    print("\n=== Проверка файла логов ===")
+    try:
+        with open("base/practice/timer_logs.json", 'r', encoding='utf-8') as f:
+            logs = json.load(f)
+        print(f"Всего записей в логе: {len(logs)}")
+        print("Последние 2 записи:")
+        for log in logs[-2:]:
+            print(f"  - {log['name']}: {log['elapsed_time']:.6f}s")
+    except Exception as e:
+        print(f"Ошибка при чтении логов: {e}")
+        
+"""
+
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
+
+def main():
+    # Путь к папке с плагинами (рядом с этим файлом)
+    plugins_path = os.path.join(current_dir, "plagins")
+    
+    print(f"Ищем плагины в: {plugins_path}")
+    
+    # Проверяем существование папки
+    if not os.path.exists(plugins_path):
+        print(f"Ошибка: Папка {plugins_path} не существует!")
+        return
+    
+    manager = PluginManager(plugins_path)
+    
+    # Обнаруживаем и загружаем все плагины
+    manager.discover_plugins()
+    
+    # Выводим список загруженных плагинов
+    print("\nЗагруженные плагины:", manager.list_plugins())
+    
+    # Используем плагины
+    if "Calculator Plugin" in manager.plugins:
+        result = manager.execute_plugin("Calculator Plugin", 'add', 10, 5)
+        print(f"Результат вычисления: {result}")
+    
+    if "Text Processor Plugin" in manager.plugins:
+        result = manager.execute_plugin("Text Processor Plugin", "hello world", 'uppercase')
+        print(f"Результат обработки текста: {result}")
+
+if __name__ == "__main__":
+    main()

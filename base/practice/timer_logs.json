@@ -1,0 +1,86 @@
+[
+  {
+    "timestamp": "2025-10-18T21:27:44.484603",
+    "name": "test_context",
+    "elapsed_time": 0.1004772000014782,
+    "unit": "milliseconds",
+    "operation": "test_context"
+  },
+  {
+    "timestamp": "2025-10-18T21:27:44.543575",
+    "name": "heavy_calculation",
+    "elapsed_time": 0.050951399985933676,
+    "unit": "milliseconds",
+    "operation": "heavy_calculation"
+  },
+  {
+    "timestamp": "2025-10-18T21:27:44.562146",
+    "name": "failing_function",
+    "elapsed_time": 0.010978000005707145,
+    "unit": "milliseconds",
+    "operation": "failing_function"
+  },
+  {
+    "timestamp": "2025-10-18T21:27:44.571792",
+    "name": "micro_test",
+    "elapsed_time": 0.0013543000095523894,
+    "unit": "microseconds",
+    "operation": "micro_test"
+  },
+  {
+    "timestamp": "2025-10-18T21:27:44.680601",
+    "name": "minute_test",
+    "elapsed_time": 0.10073830001056194,
+    "unit": "minutes",
+    "operation": "minute_test"
+  },
+  {
+    "timestamp": "2025-10-18T21:27:44.738437",
+    "name": "silent_test",
+    "elapsed_time": 0.050492400012444705,
+    "unit": "seconds",
+    "operation": "silent_test"
+  },
+  {
+    "timestamp": "2025-10-18T21:28:00.969231",
+    "name": "test_context",
+    "elapsed_time": 0.10038270000950433,
+    "unit": "milliseconds",
+    "operation": "test_context"
+  },
+  {
+    "timestamp": "2025-10-18T21:28:01.030230",
+    "name": "heavy_calculation",
+    "elapsed_time": 0.05075880000367761,
+    "unit": "milliseconds",
+    "operation": "heavy_calculation"
+  },
+  {
+    "timestamp": "2025-10-18T21:28:01.050471",
+    "name": "failing_function",
+    "elapsed_time": 0.010850299993762746,
+    "unit": "milliseconds",
+    "operation": "failing_function"
+  },
+  {
+    "timestamp": "2025-10-18T21:28:01.062790",
+    "name": "micro_test",
+    "elapsed_time": 0.001592099986737594,
+    "unit": "microseconds",
+    "operation": "micro_test"
+  },
+  {
+    "timestamp": "2025-10-18T21:28:01.173400",
+    "name": "minute_test",
+    "elapsed_time": 0.10085809999145567,
+    "unit": "minutes",
+    "operation": "minute_test"
+  },
+  {
+    "timestamp": "2025-10-18T21:28:01.232221",
+    "name": "silent_test",
+    "elapsed_time": 0.050187099986942485,
+    "unit": "seconds",
+    "operation": "silent_test"
+  }
+]
