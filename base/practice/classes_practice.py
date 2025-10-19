@@ -3,10 +3,7 @@ from typing import List, Optional, Callable, Any
 import time
 import json
 from pathlib import Path
-from base.practice.plugin_manager import PluginManager
-import os
-import sys
-from plugin_manager import PluginManager
+
 """
 
 Уровень 1: Начальный
