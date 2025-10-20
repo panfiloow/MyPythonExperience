@@ -441,7 +441,7 @@ def fifth_task():
         
         def _check_disk_space(self, source_path, dest_path):
             try:
-                dest_drive = os.path.splitdrive(dest_path)[0]
+                
                 disk_usage = shutil.disk_usage(dest_path)
                 
                 total_size = 0
