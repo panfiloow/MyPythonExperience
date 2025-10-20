@@ -211,6 +211,136 @@ def third_task() -> None:
 # При запуске показывает последние 5 операций из истории
 # Создайте собственные исключения для различных математических ошибок.
 
+def fourth_task():
+    
+    OPERATORS = {
+        '+': lambda x, y: x + y,
+        '-': lambda x, y: x - y,
+        '*': lambda x, y: x * y,
+        '/': lambda x, y: x / y,
+        '//': lambda x, y: x // y,  
+        '%': lambda x, y: x % y,   
+        '**': lambda x, y: x ** y   
+    }
+    
+    class MathError(Exception):
+        pass
+
+    class DivisionByZeroError(MathError):
+        def __init__(self):
+            super().__init__("Ошибка: Деление на ноль")
+
+    class InvalidExpressionError(MathError):
+        def __init__(self, expression):
+            super().__init__(f"Ошибка: Неверный формат выражения '{expression}'")
+
+    class InvalidOperatorError(MathError):
+        def __init__(self, operator):
+            super().__init__(f"Ошибка: Неверный оператор '{operator}'")
+
+    class CalculationError(MathError):
+        def __init__(self, message):
+            super().__init__(f"Ошибка вычисления: {message}")
+        
+    def show_last_operations(history_path):
+        try:
+            with open(history_path, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+                if lines:
+                    last_5_operations = lines[-5:] if len(lines) >= 5 else lines
+                    print("Последние 5 операций:")
+                    for operation in last_5_operations:
+                        print(operation.strip())
+                else:
+                    print("История операций пуста")
+                    
+        except FileNotFoundError:
+            print("Файл истории не найден. Будет создан новый")
+        except Exception as e:
+            print(f"Непредвиденная ошибка: {e}")
+    
+    def save_to_history(history_path, expression, result):
+        try:
+            with open(history_path, 'a', encoding='utf-8') as history:
+                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                history.write(f"[{timestamp}] {expression} = {result}\n")
+        except Exception as e:
+            print(f"Ошибка при сохранении в историю: {e}")
+            
+    def parse_expression(expression):
+        expression = expression.replace(' ', '')
+        
+        operator = None
+        for op in sorted(OPERATORS.keys(), key=len, reverse=True):
+            if op in expression:
+                operator = op
+                break
+        
+        if not operator:
+            raise InvalidExpressionError(expression)
+        
+        parts = expression.split(operator, 1)
+        if len(parts) != 2:
+            raise InvalidExpressionError(expression)
+        
+        operand1_str, operand2_str = parts
+        
+        try:
+            operand1 = float(operand1_str)
+            operand2 = float(operand2_str)
+        except ValueError:
+            raise InvalidExpressionError(expression)
+        
+        return operand1, operand2, operator
+    
+    def calculate_expression(expression):
+        operand1, operand2, operator = parse_expression(expression)
+        
+        if operator in ['/', '//'] and operand2 == 0:
+            raise DivisionByZeroError()
+        
+        if operator not in OPERATORS:
+            raise InvalidOperatorError(operator)
+        
+        try:
+            result = OPERATORS[operator](operand1, operand2)
+            return result
+        except Exception as e:
+            raise CalculationError(str(e))
+    
+    history_path = Path(r'base\practice\history.txt')
+    
+    show_last_operations(history_path)
+    print("\nДоступные операторы: +, -, *, /, //, %, **")
+    print("Примеры: 10 + 5, 3.5 * 2, 2 ** 3, 10 // 3")
+    print("Введите 'exit' для выхода")
+    
+    while True:
+        try:
+            expression = input("Введите выражение: ").strip()
+            
+            if expression.lower() == 'exit':
+                print("До свидания!")
+                break
+            
+            if not expression:
+                continue
+            5
+            result = calculate_expression(expression)
+            
+            print(f"Результат: {result}")
+            
+            save_to_history(history_path, expression, result)
+            
+        except DivisionByZeroError as e:
+            print(e)
+        except (InvalidExpressionError, InvalidOperatorError, CalculationError) as e:
+            print(e)
+        except Exception as e:
+            print(f"Непредвиденная ошибка: {e}")
+        
+        
+                
 
 # Задача 5 (Продвинутый уровень)
 # Система резервного копирования
@@ -234,12 +364,17 @@ def main():
     #first_task()
     print("=" * 45)
     print("Задача 2: Журнал ошибок")
+    print("=" * 45)
     #second_task()
     print("=" * 45)
     print("Задача 3: Валидатор конфигурационного файла")
     print("=" * 45)
-    third_task()
-    
+    #third_task()
+    print("=" * 45)
+    print("Задача 4: Калькулятор с историей операций")
+    print("=" * 45)
+    fourth_task()
+    print("=" * 45)
 
 if __name__ == "__main__":
     main()
