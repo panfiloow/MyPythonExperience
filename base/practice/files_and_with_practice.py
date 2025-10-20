@@ -1,6 +1,9 @@
 import datetime
+import logging
+import os
 from pathlib import Path
 import re
+import shutil
 from typing import Optional, Tuple
 # Задача 1 (Начальный уровень)
 # Чтение и анализ текстового файла
@@ -358,22 +361,238 @@ def fourth_task():
 # BackupFileError - ошибки при копировании отдельных файлов
 # Все исключения должны содержать подробную информацию об ошибке.
 
+def fifth_task():
+    
+    class BackupError(Exception):
+        pass
+
+    class BackupSourceError(BackupError):
+    
+        def __init__(self, path, message="Ошибка исходной директории"):
+            self.path = path
+            self.message = f"{message}: {path}"
+            super().__init__(self.message)
+
+    class BackupDestinationError(BackupError):
+        
+        def __init__(self, path, message="Ошибка директории назначения"):
+            self.path = path
+            self.message = f"{message}: {path}"
+            super().__init__(self.message)
+
+    class BackupFileError(BackupError):
+        
+        def __init__(self, file_path, message="Ошибка копирования файла"):
+            self.file_path = file_path
+            self.message = f"{message}: {file_path}"
+            super().__init__(self.message)
+
+    class BackupSystem:
+        def __init__(self):
+            self.logger = self._setup_logger()
+            self.copied_files = 0
+            self.failed_files = 0
+        
+        def _setup_logger(self):
+            logger = logging.getLogger('BackupSystem')
+            logger.setLevel(logging.INFO)
+            
+            formatter = logging.Formatter(
+                '%(asctime)s - %(levelname)s - %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S'
+            )
+            
+            file_handler = logging.FileHandler(f'backup_log_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.log')
+            file_handler.setFormatter(formatter)
+            
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(formatter)
+            
+            logger.addHandler(file_handler)
+            logger.addHandler(console_handler)
+            
+            return logger
+        
+        def _validate_source_directory(self, source_path):
+
+            if not os.path.exists(source_path):
+                raise BackupSourceError(source_path, "Исходная директория не существует")
+            
+            if not os.path.isdir(source_path):
+                raise BackupSourceError(source_path, "Указанный путь не является директорией")
+            
+            if not os.access(source_path, os.R_OK):
+                raise BackupSourceError(source_path, "Нет прав на чтение исходной директории")
+        
+        def _validate_destination_directory(self, dest_path):
+            
+            try:
+                if not os.path.exists(dest_path):
+                    os.makedirs(dest_path, exist_ok=True)
+                    self.logger.info(f"Создана директория назначения: {dest_path}")
+                
+                if not os.access(dest_path, os.W_OK):
+                    raise BackupDestinationError(dest_path, "Нет прав на запись в директорию назначения")
+                    
+            except PermissionError as e:
+                raise BackupDestinationError(dest_path, f"Ошибка прав доступа: {e}")
+            except OSError as e:
+                raise BackupDestinationError(dest_path, f"Ошибка создания директории: {e}")
+        
+        def _check_disk_space(self, source_path, dest_path):
+            try:
+                dest_drive = os.path.splitdrive(dest_path)[0]
+                disk_usage = shutil.disk_usage(dest_path)
+                
+                total_size = 0
+                for dirpath, dirnames, filenames in os.walk(source_path):
+                    for filename in filenames:
+                        filepath = os.path.join(dirpath, filename)
+                        try:
+                            total_size += os.path.getsize(filepath)
+                        except OSError:
+                            continue
+                
+                if total_size > disk_usage.free:
+                    raise BackupDestinationError(
+                        dest_path, 
+                        f"Недостаточно места на диске. Требуется: {total_size}, доступно: {disk_usage.free}"
+                    )
+                    
+                self.logger.info(f"Проверка места на диске: требуется {total_size}, доступно {disk_usage.free}")
+                
+            except OSError as e:
+                self.logger.warning(f"Не удалось проверить место на диске: {e}")
+        
+        def _copy_file(self, source_file, dest_file):
+            try:
+                dest_dir = os.path.dirname(dest_file)
+                if not os.path.exists(dest_dir):
+                    os.makedirs(dest_dir, exist_ok=True)
+                
+                shutil.copy2(source_file, dest_file)
+                self.copied_files += 1
+                self.logger.info(f"Успешно скопирован: {source_file} -> {dest_file}")
+                
+            except PermissionError as e:
+                self.failed_files += 1
+                raise BackupFileError(source_file, f"Ошибка прав доступа при копировании: {e}")
+            except OSError as e:
+                self.failed_files += 1
+                raise BackupFileError(source_file, f"Системная ошибка при копировании: {e}")
+            except Exception as e:
+                self.failed_files += 1
+                raise BackupFileError(source_file, f"Неожиданная ошибка при копировании: {e}")
+        
+        def _backup_directory(self, source_path, dest_path):
+            try:
+                for item in os.listdir(source_path):
+                    source_item = os.path.join(source_path, item)
+                    dest_item = os.path.join(dest_path, item)
+                    
+                    if os.path.isdir(source_item):
+                        self._backup_directory(source_item, dest_item)
+                    else:
+                        try:
+                            self._copy_file(source_item, dest_item)
+                        except BackupFileError as e:
+                            self.logger.error(e.message)
+                            continue
+                            
+            except PermissionError as e:
+                raise BackupSourceError(source_path, f"Ошибка доступа к исходной директории: {e}")
+            except OSError as e:
+                raise BackupSourceError(source_path, f"Ошибка чтения исходной директории: {e}")
+        
+        def create_backup(self, source_path, dest_path):
+            self.logger.info(f"Начало резервного копирования: {source_path} -> {dest_path}")
+            self.copied_files = 0
+            self.failed_files = 0
+            
+            try:
+                self._validate_source_directory(source_path)
+                self.logger.info(f"Исходная директория проверена: {source_path}")
+                
+                self._validate_destination_directory(dest_path)
+                self.logger.info(f"Директория назначения проверена: {dest_path}")
+                
+                self._check_disk_space(source_path, dest_path)
+                
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup_dir = os.path.join(dest_path, f"backup_{timestamp}")
+                os.makedirs(backup_dir, exist_ok=True)
+                
+                self._backup_directory(source_path, backup_dir)
+                
+                success = self.failed_files == 0
+                status = "УСПЕШНО" if success else "С ОШИБКАМИ"
+                
+                self.logger.info(f"Резервное копирование завершено {status}")
+                self.logger.info(f"Скопировано файлов: {self.copied_files}")
+                self.logger.info(f"Ошибок копирования: {self.failed_files}")
+                self.logger.info(f"Путь к бэкапу: {backup_dir}")
+                
+                return success
+                
+            except BackupSourceError as e:
+                self.logger.error(f"Ошибка исходной директории: {e}")
+                return False
+            except BackupDestinationError as e:
+                self.logger.error(f"Ошибка директории назначения: {e}")
+                return False
+            except Exception as e:
+                self.logger.error(f"Неожиданная ошибка: {e}")
+                return False
+    
+    backup_system = BackupSystem()
+    print("=== Система резервного копирования ===")
+    
+    try:
+        source_path = input("Введите путь к исходной директории: ").strip()
+        dest_path = input("Введите путь для сохранения бэкапа: ").strip()
+        
+        if not source_path or not dest_path:
+            print("Ошибка: пути не могут быть пустыми")
+            return
+        
+        success = backup_system.create_backup(source_path, dest_path)
+        
+        if success:
+            print("\n✅ Резервное копирование завершено успешно!")
+            print(f"Скопировано файлов: {backup_system.copied_files}")
+        else:
+            print("\n⚠️ Резервное копирование завершено с ошибками")
+            print(f"Скопировано файлов: {backup_system.copied_files}")
+            print(f"Ошибок: {backup_system.failed_files}")
+            print("Подробности смотрите в лог-файле")
+            
+    except KeyboardInterrupt:
+        print("\n\nОперация прервана пользователем")
+    except Exception as e:
+        print(f"\n❌ Критическая ошибка: {e}")
+
+
+
 def main():
     print("Задача 1: Чтение и анализ текстового файла")
     print("=" * 45)
-    #first_task()
+    first_task()
     print("=" * 45)
     print("Задача 2: Журнал ошибок")
     print("=" * 45)
-    #second_task()
+    second_task()
     print("=" * 45)
     print("Задача 3: Валидатор конфигурационного файла")
     print("=" * 45)
-    #third_task()
+    third_task()
     print("=" * 45)
     print("Задача 4: Калькулятор с историей операций")
     print("=" * 45)
     fourth_task()
+    print("=" * 45)
+    print("Задача 5: Система резервного копирования")
+    print("=" * 45)
+    fifth_task()
     print("=" * 45)
 
 if __name__ == "__main__":
