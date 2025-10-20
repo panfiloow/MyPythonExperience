@@ -1,0 +1,8 @@
+ValueError: could not convert string to float: 'gh'
+ValueError: could not convert string to float: 'gfgf' Дата и время выполнения: <class 'datetime.date'>
+ValueError: could not convert string to float: 'bv' Дата и время выполнения: <class 'datetime.date'>
+ValueError: could not convert string to float: 'dfdf' Дата и время выполнения: <attribute 'year' of 'datetime.date' objects>
+ValueError: could not convert string to float: 'gfg' Дата и время выполнения: <attribute 'year' of 'datetime.date' objects>
+ValueError: could not convert string to float: 'vbv' Дата и время выполнения: <attribute 'year' of 'datetime.date' objects>
+[2025-10-20 21:27:57] ValueError: could not convert string to float: 'gfgf' 
+[2025-10-20 21:41:05] ZeroDivisionError: Попытка деления на ноль для ввода: '0'
