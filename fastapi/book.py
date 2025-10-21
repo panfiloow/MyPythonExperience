@@ -93,4 +93,7 @@ async def delete_book_by_id(book_id: int):
             return {"status_code": 200, "msg": f"Книга '{deleted_book.title}' удалена"}
     
     raise HTTPException(status_code=404, detail=f"Книга с ID {book_id} не найдена")
-    
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("book:app", host="127.0.0.1", port=8000, reload=True)
