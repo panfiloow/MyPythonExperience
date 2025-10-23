@@ -110,27 +110,27 @@ user_dict_exclude = user.model_dump(exclude={'email'})
 print(user_dict_exclude)
 
 #Работа с датами и специальными типами
-# class AdvancedUser(BaseModel):
-#     user_id: UUID = uuid4()
-#     email: EmailStr
-#     website: Optional[HttpUrl] = None
-#     salary: Decimal
-#     metadata: Dict[str, Any] = {}  
+class AdvancedUser(BaseModel):
+    user_id: UUID = uuid4()
+    email: EmailStr
+    website: Optional[HttpUrl] = None
+    salary: Decimal
+    metadata: Dict[str, Any] = {}  
 
 
-# advanced_user_data = {
-#     "email": "john@example.com",
-#     "website": "https://johndoe.info",
-#     "salary": 2000.50
-# }
+advanced_user_data = {
+    "email": "john@example.com",
+    "website": "https://johndoe.info",
+    "salary": 2000.50
+}
 
-# try:
-#     advanced_user = AdvancedUser(**advanced_user_data)
-#     print("Успешно создан:", advanced_user.model_dump())
-# except ValidationError as e:
-#     print("Ошибки валидации:")
-#     for error in e.errors():
-#         print(f"- {error['loc']}: {error['msg']}")
+try:
+    advanced_user = AdvancedUser(**advanced_user_data)
+    print("Успешно создан:", advanced_user.model_dump())
+except ValidationError as e:
+    print("Ошибки валидации:")
+    for error in e.errors():
+        print(f"- {error['loc']}: {error['msg']}")
 
 
 
