@@ -1,0 +1,21 @@
+Практическое задание:
+Создайте простое API для блога.
+
+Модель Post: id, title, content, published (bool, по умолчанию True), 
+created_at (datetime).
+
+Реализуйте полный CRUD:
+
+GET /posts — получить список всех постов 
+(с поддержкой параметров запроса skip и limit).
+
+GET /posts/{post_id} — получить один пост по ID.
+
+POST /posts — создать новый пост.
+
+PUT /posts/{post_id} — обновить пост.
+
+DELETE /posts/{post_id} — удалить пост.
+
+Используйте подходящие HTTP-статусы и обработку ошибок.
+
